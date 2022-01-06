@@ -31,11 +31,15 @@ class TrafficLight:
             else:
                 new_state += "r"
         traci.trafficlight.setRedYellowGreenState(self.id, new_state)
+        # Prevent vehicle changing lanes now that we've changed the traffic lights
+        traci.vehicle.setLaneChangeMode(vehicle_id, 0)
 
-    def untrigger(self):
+    def untrigger(self, vehicle_id):
         self.triggered = False
         # print(f"I've passed Traffic Light {self.id}")
         traci.trafficlight.setProgram(self.id, 0)
+        # Re-enable vehicle changing lanes now that we've gone through the traffic lights
+        traci.vehicle.setLaneChangeMode(vehicle_id, 1621)
 
 
 class Vehicle:
@@ -57,7 +61,7 @@ class Vehicle:
                 # passed the TL already
                 distance = -1
                 if traffic_light.triggered:
-                    traffic_light.untrigger()
+                    traffic_light.untrigger(self.id)
             else:
                 distance = remaining_distance_on_current_edge
                 for x in range(current_route_index + 1, traffic_light_index + 1):
