@@ -51,7 +51,10 @@ class Vehicle:
         current_route_index = traci.vehicle.getRouteIndex(self.id)
         current_lane = traci.vehicle.getLaneID(self.id)
         remaining_distance_on_current_edge = traci.lane.getLength(current_lane) - traci.vehicle.getLanePosition(self.id)
-
+        edge_lengths = {
+            edge_id: traci.lane.getLength(f"{edge_id}_0")
+            for edge_id in current_route
+        }
         for traffic_light in self._traffic_lights_on_route:
             traffic_light_index = current_route.index(traffic_light.edge_from)
             if traffic_light_index < current_route_index:
@@ -62,7 +65,7 @@ class Vehicle:
             else:
                 distance = remaining_distance_on_current_edge
                 for x in range(current_route_index + 1, traffic_light_index + 1):
-                    distance += traci.lane.getLength(f"{current_route[x]}_0")
+                    distance += edge_lengths[current_route[x]]
             traffic_light.current_distance = distance
             if 0 <= traffic_light.current_distance < TRAFFIC_LIGHT_THRESHOLD and not traffic_light.triggered:
                 traffic_light.trigger(self.id, self._route_edge_pairs)
