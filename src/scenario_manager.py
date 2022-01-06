@@ -9,7 +9,7 @@ scenarioNumberConfigTuple = namedtuple(
     "scenarioNumberConfig",
     "nameModifier enableManager",
 )
-scenarioMapConfigTuple = namedtuple("scenarioMapConfig", "mapName defaultTrafficScale")
+scenarioMapConfigTuple = namedtuple("scenarioMapConfig", "mapName defaultTrafficScale ambulanceStartStep ambulanceStartEdge ambulanceEndEdge")
 
 DEFAULT_OUTPUT_SAVE_LOCATION = "output/additional.xml"
 
@@ -18,9 +18,10 @@ SCENARIO_NUMBER_CONFIGS = {
     2: scenarioNumberConfigTuple("", True),
 }
 SCENARIO_LOCATION_CONFIG = {
-    "Blackwell": scenarioMapConfigTuple("BlackwellTunnelNorthApproach", 1),
-    "Intersection": scenarioMapConfigTuple("NormalIntersection", 3),
-    "Roundabout": scenarioMapConfigTuple("A13NorthCircularRoundabout", 1),
+    "Blackwell": scenarioMapConfigTuple("BlackwellTunnelNorthApproach", 1, 20, "NewIn", "A12NorthOut"),
+    "Intersection": scenarioMapConfigTuple("NormalIntersection", 3, None, None, None),
+    "Roundabout": scenarioMapConfigTuple("A13NorthCircularRoundabout", 1, None, None, None),
+    "London": scenarioMapConfigTuple("London", 1, 20, "-564865636#0", "100077167#2"),
 }
 
 
@@ -73,7 +74,12 @@ def runScenario(mapName, scenarioNum, numOfSteps=5000):
         if scenarioNumberConfig.enableManager
         else None
     )
+
     while step < numOfSteps:
+        if scenarioLocationConfig.ambulanceStartStep and scenarioLocationConfig.ambulanceStartStep == traci.simulation.getTime():
+            traci.route.add("ambulance_route", [scenarioLocationConfig.ambulanceStartEdge, scenarioLocationConfig.ambulanceEndEdge])
+            traci.vehicle.add(vehID="ambulance", routeID="ambulance_route", typeID="ambulance", departSpeed="max")
+
         if manager:
             manager.handleSimulationStep()
         traci.simulationStep()
