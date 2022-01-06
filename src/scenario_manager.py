@@ -7,19 +7,15 @@ from collections import namedtuple
 
 scenarioNumberConfigTuple = namedtuple(
     "scenarioNumberConfig",
-    "nameModifier enableManager enablePlatoons enableCoordination enableZipping maxVehiclesPerPlatoon",
+    "nameModifier enableManager",
 )
 scenarioMapConfigTuple = namedtuple("scenarioMapConfig", "mapName defaultTrafficScale")
 
 DEFAULT_OUTPUT_SAVE_LOCATION = "output/additional.xml"
 
 SCENARIO_NUMBER_CONFIGS = {
-    1: scenarioNumberConfigTuple("", False, False, False, False, 0),
-    2: scenarioNumberConfigTuple("", True, True, False, False, 0),
-    3: scenarioNumberConfigTuple("_no_TLS", True, True, True, False, 0),
-    4: scenarioNumberConfigTuple("_no_TLS", True, True, True, True, 0),
-    # Extra scenarios
-    5: scenarioNumberConfigTuple("", True, True, False, False, 5),  # Limit platoon size
+    1: scenarioNumberConfigTuple("", False),
+    2: scenarioNumberConfigTuple("", True),
 }
 SCENARIO_LOCATION_CONFIG = {
     "Blackwell": scenarioMapConfigTuple("BlackwellTunnelNorthApproach", 1),
@@ -73,12 +69,7 @@ def runScenario(mapName, scenarioNum, numOfSteps=5000):
     )
     step = 0
     manager = (
-        SimulationManager(
-            scenarioNumberConfig.enablePlatoons,
-            scenarioNumberConfig.enableCoordination,
-            scenarioNumberConfig.enableZipping,
-            scenarioNumberConfig.maxVehiclesPerPlatoon,
-        )
+        SimulationManager()
         if scenarioNumberConfig.enableManager
         else None
     )
@@ -88,10 +79,4 @@ def runScenario(mapName, scenarioNum, numOfSteps=5000):
         traci.simulationStep()
         step += 1
 
-    # If we have a manager, try to get some stats
-    if manager:
-        logging.info("Max number of stopped cars: %s", manager.maxStoppedVehicles)
-        logging.info(
-            "Average length of platoon: %s", manager.getAverageLengthOfAllPlatoons()
-        )
     traci.close()

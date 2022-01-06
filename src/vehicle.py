@@ -1,15 +1,90 @@
 import traci
 
+TRAFFIC_LIGHT_THRESHOLD = 30
+
+
+class TrafficLight:
+
+    def __init__(self, traffic_light_id, edge_from, edge_to):
+        self.id = traffic_light_id
+        self.edge_from = edge_from
+        self.edge_to = edge_to
+        self.current_distance = 0
+        self.triggered = False
+
+    def trigger(self, vehicle_id):
+        self.triggered = True
+        # print(f"I'm close to Traffic Light {self.id}")
+        new_state = ""
+        current_vehicle_lane = traci.vehicle.getLaneID(vehicle_id)
+        next_edge_index = traci.vehicle.getRouteIndex(vehicle_id) + 1
+        next_edge = traci.vehicle.getRoute(vehicle_id)[next_edge_index]
+        for link in traci.trafficlight.getControlledLinks(self.id):
+            from_lane = link[0][0]
+            to_lane = link[0][1]
+            if from_lane == current_vehicle_lane and next_edge in to_lane:
+                new_state += "G"
+            else:
+                new_state += "r"
+        traci.trafficlight.setRedYellowGreenState(self.id, new_state)
+
+    def untrigger(self):
+        self.triggered = False
+        # print(f"I've passed Traffic Light {self.id}")
+        traci.trafficlight.setProgram(self.id, 0)
+
 
 class Vehicle:
     def __init__(self, vehicle):
-        self._active = True
-        self._acceleration = traci.vehicle.getAcceleration(vehicle)
-        self._length = traci.vehicle.getLength(vehicle)
-        self._maxSpeed = traci.vehicle.getMaxSpeed(vehicle)
-        self._name = vehicle
+        self.id = vehicle
         self._route = traci.vehicle.getRoute(vehicle)
-        self._previouslySetValues = dict()
+        self._route_edge_pairs = self.calculate_route_edge_pairs()
+        self._traffic_lights_on_route = self.calculate_traffic_lights_on_route()
+
+    def calculate_traffic_light_distances(self):
+        current_route = self._route
+        current_route_index = traci.vehicle.getRouteIndex(self.id)
+        current_lane = traci.vehicle.getLaneID(self.id)
+        remaining_distance_on_current_edge = traci.lane.getLength(current_lane) - traci.vehicle.getLanePosition(self.id)
+
+        for traffic_light in self._traffic_lights_on_route:
+            traffic_light_index = current_route.index(traffic_light.edge_from)
+            if traffic_light_index < current_route_index:
+                # passed the TL already
+                distance = -1
+                if traffic_light.triggered:
+                    traffic_light.untrigger()
+            else:
+                distance = remaining_distance_on_current_edge
+                for x in range(current_route_index + 1, traffic_light_index + 1):
+                    distance += traci.lane.getLength(f"{current_route[x]}_0")
+            traffic_light.current_distance = distance
+            if 0 <= traffic_light.current_distance < TRAFFIC_LIGHT_THRESHOLD and not traffic_light.triggered:
+                traffic_light.trigger(self.id)
+
+    def calculate_route_edge_pairs(self):
+        edge_pairs = set()
+        for i, edge in enumerate(self._route):
+            if i == len(self._route) - 1:
+                break
+            edge_pairs.add((edge, self._route[i+1]))
+        return edge_pairs
+
+    def calculate_traffic_lights_on_route(self):
+        traffic_lights_on_route = []
+        traffic_light_ids = traci.trafficlight.getIDList()
+        for traffic_light_id in traffic_light_ids:
+            links = traci.trafficlight.getControlledLinks(traffic_light_id)
+            for link in links:
+                from_edge = link[0][0].split("_")[0]
+                to_edge = link[0][1].split("_")[0]
+                edge_pair = (from_edge, to_edge)
+                if edge_pair in self._route_edge_pairs:
+                    traffic_lights_on_route.append(TrafficLight(traffic_light_id, from_edge, to_edge))
+                    break
+        return traffic_lights_on_route
+
+
 
     def getAcceleration(self):
         return self._acceleration
@@ -42,7 +117,7 @@ class Vehicle:
         return self._maxSpeed
 
     def getName(self):
-        return self._name
+        return self.id
 
     def getRemainingRoute(self):
         return self._route[traci.vehicle.getRouteIndex(self.getName()) :]
