@@ -15,14 +15,18 @@ class TrafficLight:
     def trigger(self, vehicle_id):
         self.triggered = True
         # print(f"I'm close to Traffic Light {self.id}")
+        current_state = traci.trafficlight.getRedYellowGreenState(self.id)
         new_state = ""
         current_vehicle_lane = traci.vehicle.getLaneID(vehicle_id)
         next_edge_index = traci.vehicle.getRouteIndex(vehicle_id) + 1
         next_edge = traci.vehicle.getRoute(vehicle_id)[next_edge_index]
-        for link in traci.trafficlight.getControlledLinks(self.id):
+        for i, link in enumerate(traci.trafficlight.getControlledLinks(self.id)):
             from_lane = link[0][0]
             to_lane = link[0][1]
             if from_lane == current_vehicle_lane and next_edge in to_lane:
+                if current_state[i] == "G":
+                    new_state = current_state
+                    break
                 new_state += "G"
             else:
                 new_state += "r"
