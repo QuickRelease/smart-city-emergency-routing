@@ -7,25 +7,26 @@ from collections import namedtuple
 
 scenarioNumberConfigTuple = namedtuple(
     "scenarioNumberConfig",
-    "nameModifier enableManager",
+    "nameModifier enableManager level",
 )
 scenarioMapConfigTuple = namedtuple("scenarioMapConfig", "mapName defaultTrafficScale ambulanceStartStep ambulanceStartEdge ambulanceEndEdge")
 
 DEFAULT_OUTPUT_SAVE_LOCATION = "output/additional.xml"
 
 SCENARIO_NUMBER_CONFIGS = {
-    1: scenarioNumberConfigTuple("", False),
-    2: scenarioNumberConfigTuple("", True),
+    0: scenarioNumberConfigTuple("", False, 0),
+    1: scenarioNumberConfigTuple("", True, 1),
+    2: scenarioNumberConfigTuple("", True, 2),
 }
 SCENARIO_LOCATION_CONFIG = {
-    "Blackwell": scenarioMapConfigTuple("BlackwellTunnelNorthApproach", 1, 20, "NewIn", "A12NorthOut"),
+    "Blackwell": scenarioMapConfigTuple("BlackwellTunnelNorthApproach", 1, 80, "NewIn", "A12NorthOut"),
     "Intersection": scenarioMapConfigTuple("NormalIntersection", 3, None, None, None),
-    "Roundabout": scenarioMapConfigTuple("A13NorthCircularRoundabout", 1, None, None, None),
+    "Roundabout": scenarioMapConfigTuple("A13NorthCircularRoundabout", 1, 100, "NCSouthIn", "A13EastOut"),
     "London": scenarioMapConfigTuple("London", 1, 20, "-564865636#0", "100077167#2"),
 }
 
 
-def runScenario(mapName, scenarioNum, numOfSteps=5000):
+def runScenario(mapName, scenarioNum, numOfSteps=20000):
     """Runs a given scenario using the given scenario name and number."""
     logging.info("Starting scenario for (name: %s | number: %s)")
     # Get config information
@@ -70,7 +71,7 @@ def runScenario(mapName, scenarioNum, numOfSteps=5000):
     )
     step = 0
     manager = (
-        SimulationManager()
+        SimulationManager(scenarioNumberConfig.level)
         if scenarioNumberConfig.enableManager
         else None
     )
