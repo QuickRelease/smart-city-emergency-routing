@@ -12,18 +12,15 @@ class TrafficLight:
         self.current_distance = 0
         self.triggered = False
 
-    def trigger(self, vehicle_id):
+    def trigger(self, vehicle_id, route_edge_pairs):
         self.triggered = True
         # print(f"I'm close to Traffic Light {self.id}")
         current_state = traci.trafficlight.getRedYellowGreenState(self.id)
         new_state = ""
-        current_vehicle_lane = traci.vehicle.getLaneID(vehicle_id)
-        next_edge_index = traci.vehicle.getRouteIndex(vehicle_id) + 1
-        next_edge = traci.vehicle.getRoute(vehicle_id)[next_edge_index]
         for i, link in enumerate(traci.trafficlight.getControlledLinks(self.id)):
-            from_lane = link[0][0]
-            to_lane = link[0][1]
-            if from_lane == current_vehicle_lane and next_edge in to_lane:
+            from_edge = link[0][0].split("_")[0]
+            to_edge = link[0][1].split("_")[0]
+            if (from_edge, to_edge) in route_edge_pairs:
                 if current_state[i] == "G":
                     new_state = current_state
                     break
@@ -68,7 +65,7 @@ class Vehicle:
                     distance += traci.lane.getLength(f"{current_route[x]}_0")
             traffic_light.current_distance = distance
             if 0 <= traffic_light.current_distance < TRAFFIC_LIGHT_THRESHOLD and not traffic_light.triggered:
-                traffic_light.trigger(self.id)
+                traffic_light.trigger(self.id, self._route_edge_pairs)
 
     def calculate_route_edge_pairs(self):
         edge_pairs = set()
