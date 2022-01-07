@@ -1,0 +1,7 @@
+<configuration>
+   <input>
+       <net-file value="FutureBlackwell.net.xml"/>
+       <route-files value="FutureBlackwell.rou.xml"/>
+	   <gui-settings-file value="../map_style.xml"/>
+   </input>
+</configuration>
