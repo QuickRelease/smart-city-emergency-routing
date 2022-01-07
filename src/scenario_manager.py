@@ -99,7 +99,9 @@ def runScenario(mapName, scenarioNum, numOfSteps=20000):
             traci.vehicle.add(vehID="ambulance", routeID="ambulance_route", typeID="ambulance", departSpeed="max")
             traci.gui.setZoom(view_name, scenarioLocationConfig.cutZoom)
             traci.gui.trackVehicle(view_name, "ambulance")
-            if scenarioNumberConfig.level==4:
+            if scenarioNumberConfig.level == 3:
+                traci.vehicle.setParameter("ambulance", "device.bluelight.reactiondist", "10")
+            elif scenarioNumberConfig.level == 4:
                 traci.vehicle.setParameter("ambulance", "device.bluelight.reactiondist", "150")
         if manager:
             manager.handleSimulationStep()
