@@ -9,7 +9,10 @@ scenarioNumberConfigTuple = namedtuple(
     "scenarioNumberConfig",
     "nameModifier enableManager level",
 )
-scenarioMapConfigTuple = namedtuple("scenarioMapConfig", "mapName defaultTrafficScale ambulanceStartStep ambulanceStartEdge ambulanceEndEdge")
+scenarioMapConfigTuple = namedtuple(
+    "scenarioMapConfig",
+    "mapName defaultTrafficScale initialZoom initialX initialY cutZoom ambulanceStartStep ambulanceStartEdge ambulanceEndEdge forceThreshold biasThreshold biasMultiplier"
+)
 
 DEFAULT_OUTPUT_SAVE_LOCATION = "output/additional.xml"
 
@@ -18,11 +21,12 @@ SCENARIO_NUMBER_CONFIGS = {
     1: scenarioNumberConfigTuple("", True, 1),
     2: scenarioNumberConfigTuple("", True, 2),
 }
+
 SCENARIO_LOCATION_CONFIG = {
-    "Blackwell": scenarioMapConfigTuple("BlackwellTunnelNorthApproach", 1, 80, "NewIn", "A12NorthOut"),
-    "Intersection": scenarioMapConfigTuple("NormalIntersection", 3, None, None, None),
-    "Roundabout": scenarioMapConfigTuple("A13NorthCircularRoundabout", 1, 100, "NCSouthIn", "A13EastOut"),
-    "London": scenarioMapConfigTuple("London", 1, 20, "-564865636#0", "100077167#2"),
+    "Blackwell": scenarioMapConfigTuple("BlackwellTunnelNorthApproach", 1, 310.461, 432.022, 1352.41, 1200, 80, "NewIn", "A12NorthOut", 60, 300, 0.5),
+    "Intersection": scenarioMapConfigTuple("NormalIntersection", 3, 484.915, 108.796, 100.417, 677.369, 20, "leftin", "rightout", 60, 1000, 0.5),
+    "Roundabout": scenarioMapConfigTuple("A13NorthCircularRoundabout", 1, 131.666, 851.572, 920.085, 550, 100, "NCSouthIn", "A13EastOut", 60, 1000, 0.5),
+    "London": scenarioMapConfigTuple("London", 1, 256.579, 3229.19, 1916.58, 3057.95, 3, "-564865636#0", "100077167#2", 60, 1000, 0.5),
 }
 
 
@@ -71,16 +75,27 @@ def runScenario(mapName, scenarioNum, numOfSteps=20000):
     )
     step = 0
     manager = (
-        SimulationManager(scenarioNumberConfig.level)
+        SimulationManager(
+            level=scenarioNumberConfig.level,
+            force_threshold=scenarioLocationConfig.forceThreshold,
+            bias_threshold=scenarioLocationConfig.biasThreshold,
+            bias_multiplier=scenarioLocationConfig.biasMultiplier,
+        )
         if scenarioNumberConfig.enableManager
         else None
     )
+
+    view_name = "View #0"
+
+    traci.gui.setZoom(view_name, scenarioLocationConfig.initialZoom)
+    traci.gui.setOffset(view_name, scenarioLocationConfig.initialX, scenarioLocationConfig.initialY)
 
     while step < numOfSteps:
         if scenarioLocationConfig.ambulanceStartStep and scenarioLocationConfig.ambulanceStartStep == traci.simulation.getTime():
             traci.route.add("ambulance_route", [scenarioLocationConfig.ambulanceStartEdge, scenarioLocationConfig.ambulanceEndEdge])
             traci.vehicle.add(vehID="ambulance", routeID="ambulance_route", typeID="ambulance", departSpeed="max")
-
+            traci.gui.setZoom(view_name, scenarioLocationConfig.cutZoom)
+            traci.gui.trackVehicle(view_name, "ambulance")
         if manager:
             manager.handleSimulationStep()
         traci.simulationStep()
