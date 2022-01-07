@@ -23,4 +23,14 @@
   <flow id="RoundInNew" type="normal_car" begin="0" end="5000" vehsPerHour="50" from="RoundIn" to="NewOut" departPos="last" departLane="best" />
   <flow id="RoundInA13" type="normal_car" begin="0" end="5000" vehsPerHour="150" from="RoundIn" to="A13Out" departPos="last" departLane="best" />
 
+  <flow id="PeopleInTheWay" type="normal_car" begin="0" end="5000" vehsPerHour="500" from="NewIn" to="A12NorthOut" departPos="last" departLane="best" />
+
+  <vType id="ambulance" vClass="emergency" guiShape="emergency">
+    <param key="has.bluelight.device" value="true"/>
+  </vType>
+
+<!--  <vehicle id="ambulance" type="ambulance" depart="40">-->
+<!--    <route edges="NewIn NewRoadIn A12RoadWest A12MergeOnNorth2 A12MergeOnNorth1 gneE34 A12NorthOut"/>-->
+<!--  </vehicle>-->
+
 </routes>

@@ -1,0 +1,7 @@
+<configuration>
+   <input>
+       <net-file value="Highway.net.xml"/>
+       <route-files value="Highway.rou.xml"/>
+	   <gui-settings-file value="../map_style.xml"/>
+   </input>
+</configuration>
