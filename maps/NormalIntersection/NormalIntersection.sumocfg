@@ -2,6 +2,6 @@
    <input>
        <net-file value="NormalIntersection.net.xml"/>
        <route-files value="NormalIntersection.rou.xml"/>
-	   <gui-settings-file value="gui.settings.xml"/>
+	   <gui-settings-file value="../map_style.xml"/>
    </input>
 </configuration>

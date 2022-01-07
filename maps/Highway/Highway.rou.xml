@@ -1,0 +1,7 @@
+<routes>
+  <vType id="normal_car" vClass="passenger" departspeed="max"/>
+  <vType id="ambulance" vClass="emergency" guiShape="emergency">
+    <param key="has.bluelight.device" value="true"/>
+  </vType>
+  <flow id="car_flow" type="normal_car" begin="0" end="5000" vehsPerHour="500" from="left" to="right" departPos="last"/>
+</routes>
