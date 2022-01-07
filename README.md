@@ -1,6 +1,6 @@
 # Smart City Emergency Routing
 
-Project created for ZF Hackathon 2022
+Project completed by the ALTEN Labs Team for the ZF Hackathon 2022
 
 ## Instructions
 
@@ -15,3 +15,9 @@ Project created for ZF Hackathon 2022
 2 = With FORCING & BIASING (further away traffic lights get their phases biased to help reduce upcoming traffic)  
 3 = With vehicles moving out of the way for the ambulance  
 4 = With vehicles moving out of the way for the ambulance in advanced  
+
+## Details
+
+![image](https://user-images.githubusercontent.com/37864918/148594068-2ea7007e-6e9c-42db-95f0-930f4903aaa2.png)
+![image](https://user-images.githubusercontent.com/37864918/148594096-0ab47daf-e2e0-41d0-a16f-15c948f1aaaf.png)
+
