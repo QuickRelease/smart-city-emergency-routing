@@ -17,6 +17,8 @@ class SimulationManager:
 
         for vehicle_id in allVehicles:
             if traci.vehicle.getTypeID(vehicle_id) == "ambulance" and not vehicle_id in self.emergency_vehicles:
+                if self.level==4:
+                    traci.vehicle.setParameter(vehicle_id, "device.bluelight.reactiondist", "70")
                 self.emergency_vehicles[vehicle_id] = Vehicle(vehicle_id, self.bias_mode)
 
         vehicle_ids_to_delete = []

@@ -20,9 +20,12 @@ SCENARIO_NUMBER_CONFIGS = {
     0: scenarioNumberConfigTuple("", False, 0),
     1: scenarioNumberConfigTuple("", True, 1),
     2: scenarioNumberConfigTuple("", True, 2),
+    3: scenarioNumberConfigTuple("", False, 3),
+    4: scenarioNumberConfigTuple("", False, 4),
 }
 
 SCENARIO_LOCATION_CONFIG = {
+    "FutureBlackwell": scenarioMapConfigTuple("FutureBlackwell", 1, 310.461, 432.022, 1352.41, 1200, 100, "NewIn", "A12NorthOut", 60, 300, 0.5),
     "Blackwell": scenarioMapConfigTuple("BlackwellTunnelNorthApproach", 1, 310.461, 432.022, 1352.41, 1200, 80, "NewIn", "A12NorthOut", 60, 300, 0.5),
     "Intersection": scenarioMapConfigTuple("NormalIntersection", 3, 484.915, 108.796, 100.417, 677.369, 20, "leftin", "rightout", 60, 1000, 0.5),
     "Roundabout": scenarioMapConfigTuple("A13NorthCircularRoundabout", 1, 131.666, 851.572, 920.085, 550, 100, "NCSouthIn", "A13EastOut", 60, 1000, 0.5),
@@ -71,7 +74,7 @@ def runScenario(mapName, scenarioNum, numOfSteps=20000):
     )
 
     setUpSimulation(
-        mapLocation, scenarioLocationConfig.defaultTrafficScale, outputFileLocation
+        mapLocation, scenarioLocationConfig.defaultTrafficScale, outputFileLocation, scenarioNumberConfig.level 
     )
     step = 0
     manager = (
@@ -96,6 +99,8 @@ def runScenario(mapName, scenarioNum, numOfSteps=20000):
             traci.vehicle.add(vehID="ambulance", routeID="ambulance_route", typeID="ambulance", departSpeed="max")
             traci.gui.setZoom(view_name, scenarioLocationConfig.cutZoom)
             traci.gui.trackVehicle(view_name, "ambulance")
+            if scenarioNumberConfig.level==4:
+                traci.vehicle.setParameter("ambulance", "device.bluelight.reactiondist", "150")
         if manager:
             manager.handleSimulationStep()
         traci.simulationStep()
