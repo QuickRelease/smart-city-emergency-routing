@@ -22,3 +22,6 @@ Project completed by the ALTEN Labs Team for the ZF Hackathon 2022
 ![image](https://user-images.githubusercontent.com/37864918/148594068-2ea7007e-6e9c-42db-95f0-930f4903aaa2.png)
 ![image](https://user-images.githubusercontent.com/37864918/148594096-0ab47daf-e2e0-41d0-a16f-15c948f1aaaf.png)
 
+## Credits
+
+Scenario runner skeleton and some of the maps based on https://github.com/sraddon/SUMO-V2X-Communication-Research-Platooning-and-CIM
